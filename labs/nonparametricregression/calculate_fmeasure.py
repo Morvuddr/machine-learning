@@ -1,22 +1,22 @@
 
 def recall(t, p):
-    return t / p
+    return float(t) / float(p)
 
 
 def precision(t, c):
-    return t / c
+    return float(t) / float(c)
 
 
-def fmeasure(t, c , p):
+def fmeasure(t, c, p):
     if t == 0:
         return 0
-    prec = precision(t,p)
+    prec = precision(t, p)
     rec = recall(t, c)
     return 2 * prec * rec / (prec + rec)
 
 
 def cal_precision_w(t, c, p):
-    return t * c / p
+    return float(t) * float(c) / float(p)
 
 
 def calculate_fmeasure(confusion_matrix):
@@ -32,7 +32,7 @@ def calculate_fmeasure(confusion_matrix):
         for j in range(classes_count):
             all += confusion_matrix[i][j]
             ci += confusion_matrix[i][j]
-            pi += confusion_matrix[i][j]
+            pi += confusion_matrix[j][i]
         ts.append(confusion_matrix[i][i])
         cs.append(ci)
         ps.append(pi)
@@ -50,6 +50,6 @@ def calculate_fmeasure(confusion_matrix):
     recall_w /= all
     micro_f /= all
 
-    macro_f = 2 * precision_w * recall_w / (precision_w * recall_w)
+    macro_f = 2 * precision_w * recall_w / (precision_w + recall_w)
 
     return (macro_f + micro_f) / 2

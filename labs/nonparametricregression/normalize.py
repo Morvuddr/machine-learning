@@ -3,8 +3,8 @@ import math
 
 def normalize_attributes(entities):
     for i in range(len(entities[0].attributes)):
-        avg = 0
-        rmse = 0
+        avg = 0.0
+        rmse = 0.0
 
         # calculate average for attribute
         for j in range(len(entities)):
@@ -13,7 +13,7 @@ def normalize_attributes(entities):
 
         # calculate root mean square error for attribute
         for j in range(len(entities)):
-            rmse += pow(entities[j].attributes[i], 2)
+            rmse += pow((entities[j].attributes[i] - avg), 2)
         rmse = math.sqrt(rmse / len(entities))
 
         # calculate normalized attribute
