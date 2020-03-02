@@ -7,8 +7,10 @@ from labs.nonparametricregression.nonparametric_regression import calculate_dist
 
 
 class Result:
-    def __init__(self, reduction_type, distance_type, kernel_type, window_type, fmeasure, window_size=[0.0],
+    def __init__(self, reduction_type, distance_type, kernel_type, window_type, fmeasure, window_size=None,
                  neighbours_count=0):
+        if window_size is None:
+            window_size = [0.0]
         self.reduction_type = reduction_type
         self.distance_type = distance_type
         self.kernel_type = kernel_type
@@ -91,19 +93,55 @@ def main():
                                       window_sizes, neighbours_count)
 
                 naive_results.append(naive_result)
-                # calculate all fmeasures for OneHot reduction
-                # one_hot_fmeasure = leave_one_out_one_hot(entities, distance_type, kernel_type, window_type)
-                # one_hot_results.append(Result(ReductionType.one_hot, distance_type, kernel_type, window_type, one_hot_fmeasure))
 
+                # calculate all fmeasures for OneHot reduction
+                one_hot_fmeasure = leave_one_out_one_hot(entities,
+                                                         distance_type,
+                                                         distances,
+                                                         kernel_type,
+                                                         window_type,
+                                                         window_sizes,
+                                                         neighbours_count)
+                one_hot_results.append(
+                    Result(ReductionType.one_hot,
+                           distance_type,
+                           kernel_type,
+                           window_type,
+                           one_hot_fmeasure,
+                           window_sizes,
+                           neighbours_count))
+
+    naive_max = max(naive_results, key=lambda x: x.fmeasure)
+    one_hot_max = max(one_hot_results, key=lambda x: x.fmeasure)
+
+
+    
+
+
+
+
+
+    # print all results
     for result in naive_results:
         print(result.window_type.value, result.distance_type.value, result.kernel_type.value,
               " = ",
               result.fmeasure)
-    naive_max = max(naive_results, key=lambda result: result.fmeasure)
+
     print("---- Best NAIVE result: ",
           naive_max.window_type.value, naive_max.distance_type.value, naive_max.kernel_type.value,
           " = ",
           naive_max.fmeasure,
+          " ----")
+
+    for result in one_hot_results:
+        print(result.window_type.value, result.distance_type.value, result.kernel_type.value,
+              " = ",
+              result.fmeasure)
+
+    print("---- Best OneHot result: ",
+          one_hot_max.window_type.value, one_hot_max.distance_type.value, one_hot_max.kernel_type.value,
+          " = ",
+          one_hot_max.fmeasure,
           " ----")
 
 

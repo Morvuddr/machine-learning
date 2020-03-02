@@ -8,29 +8,27 @@ class Distance:
         self.index = index
 
 
-def cal_average(entities, reduction_type):
-    if reduction_type == ReductionType.naive:
-        sum_num = 0
-        for entity in entities:
-            sum_num += entity.class_number
-        avg = sum_num / len(entities)
-        return avg
-    elif reduction_type == ReductionType.one_hot:
-        avg_list = []
-        for i in range(len(entities[0].class_list)):
-            avg = 0
-            for j in range(len(entities)):
-                avg += entities[j].class_list[i]
-            avg /= len(entities)
-            avg_list.append(avg)
-        return avg_list.index(max(avg_list))
-    return 0
+def cal_average_naive(query_entity, entities, z):
+    sum_num = 0
+    for entity in entities:
+        sum_num += entity.class_number
+    avg = (sum_num - query_entity.class_number) / len(entities)
+    return avg
+
+
+def cal_average_one_hot(query_entity, entities, class_index):
+    avg = 0
+    for i in range(len(entities)):
+        avg += entities[i].class_list[class_index]
+    avg = (avg - query_entity.class_list[class_index]) / len(entities)
+    return avg
 
 
 def cal_similar_entities(query_entity, entities):
     similar = []
     for entity in entities:
-        if entity.normalized_attributes == query_entity.normalized_attributes:
+        if entity.normalized_attributes == query_entity.normalized_attributes and \
+                entities.index(query_entity) != entities.index(entity):
             similar.append(entity)
     return similar
 
@@ -84,10 +82,23 @@ def calculate_kernel(k_type, distance):
     return kernel
 
 
-def nonparametric_regression(query_entity, entities, reduction_type, kernel_type, window_type, window_size=0,
-                             neighbours_count=0, distances=None, distance_type=DistanceFuncType.MANHATTAN):
+def nonparametric_regression(reduction_type,
+                             query_entity,
+                             entities,
+                             kernel_type,
+                             window_type,
+                             distance_type,
+                             window_size=0,
+                             neighbours_count=0,
+                             distances=None,
+                             class_index=-1):
     n = len(entities) - 1
     m = len(entities[0].normalized_attributes)
+
+    if reduction_type == ReductionType.naive:
+        cal_average = cal_average_naive
+    else:
+        cal_average = cal_average_one_hot
 
     if distances is None:
         distances = []
@@ -102,20 +113,22 @@ def nonparametric_regression(query_entity, entities, reduction_type, kernel_type
     if window_size == 0:
         similar_entities = cal_similar_entities(query_entity, entities)
         if len(similar_entities) != 0:
-            return cal_average(similar_entities, reduction_type)
+            return cal_average(query_entity, similar_entities, class_index)
         else:
-            return cal_average(entities, reduction_type)
+            return cal_average(query_entity, entities, class_index)
 
     numerator = 0
     denominator = 0
     for i in range(n):
-
         kernel = calculate_kernel(kernel_type, (distances[i].value / window_size))
-        target_value = entities[distances[i].index].class_number
+        if reduction_type == ReductionType.naive:
+            target_value = entities[distances[i].index].class_number
+        else:
+            target_value = entities[distances[i].index].class_list[class_index]
         numerator += target_value * kernel
         denominator += kernel
 
     if denominator == 0:
-        return cal_average(entities, reduction_type)
+        return cal_average(query_entity, entities, class_index)
     else:
         return numerator / denominator
