@@ -7,7 +7,7 @@ from labs.nonparametricregression.nonparametric_regression import calculate_dist
 
 
 class Result:
-    def __init__(self, reduction_type, distance_type, kernel_type, window_type, fmeasure, window_size=0,
+    def __init__(self, reduction_type, distance_type, kernel_type, window_type, fmeasure, window_size=[0.0],
                  neighbours_count=0):
         self.reduction_type = reduction_type
         self.distance_type = distance_type
@@ -23,6 +23,8 @@ def main():
     class_names = []
     naive_results = []
     one_hot_results = []
+    window_sizes = [5.0, 2.0, 0.5]
+    neighbours_count = 10
     manhattan_distances = []
     euclidean_distances = []
     chebyshev_distances = []
@@ -70,8 +72,6 @@ def main():
     for i in range(len(manhattan_distances)):
         chebyshev_distances[i] = sorted(chebyshev_distances[i], key=lambda d: d.value)
 
-    window_size = 0.5
-    neighbours_count = 10
     for window_type in WindowType:
         for distance_type in DistanceFuncType:
             for kernel_type in KernelFuncType:
@@ -84,19 +84,27 @@ def main():
                     distances = chebyshev_distances
 
                 # calculate all fmeasures for naive reduction
-                naive_fmeasure = leave_one_out_naive(entities, distances, kernel_type, window_type, window_size,
+                naive_fmeasure = leave_one_out_naive(entities, distance_type, distances, kernel_type, window_type,
+                                                     window_sizes,
                                                      neighbours_count)
                 naive_result = Result(ReductionType.naive, distance_type, kernel_type, window_type, naive_fmeasure,
-                                      window_size, neighbours_count)
-                print(naive_result.distance_type.value, naive_result.kernel_type.value, naive_result.window_type.value,
-                      naive_result.window_size, naive_result.neighbours_count, " = ", naive_result.fmeasure)
+                                      window_sizes, neighbours_count)
+
                 naive_results.append(naive_result)
                 # calculate all fmeasures for OneHot reduction
                 # one_hot_fmeasure = leave_one_out_one_hot(entities, distance_type, kernel_type, window_type)
                 # one_hot_results.append(Result(ReductionType.one_hot, distance_type, kernel_type, window_type, one_hot_fmeasure))
 
-    print(max(naive_results, key=lambda result: result.fmeasure).fmeasure)
-    # print(max(one_hot_results, key=lambda result: result.fmeasure))
+    for result in naive_results:
+        print(result.window_type.value, result.distance_type.value, result.kernel_type.value,
+              " = ",
+              result.fmeasure)
+    naive_max = max(naive_results, key=lambda result: result.fmeasure)
+    print("---- Best NAIVE result: ",
+          naive_max.window_type.value, naive_max.distance_type.value, naive_max.kernel_type.value,
+          " = ",
+          naive_max.fmeasure,
+          " ----")
 
 
 if __name__ == "__main__":

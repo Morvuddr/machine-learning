@@ -96,23 +96,8 @@ def nonparametric_regression(query_entity, entities, reduction_type, kernel_type
             distances.append(Distance(value, i))
         distances = sorted(distances, key=lambda d: d.value)
 
-    if window_type == WindowType.FIXED:
-        for i in range(n):
-            if distances[i].value >= window_size:
-                neighbours_count = i
-                break
-            if i == n - 1:
-                neighbours_count = n
-                break
-    elif window_type == WindowType.VARIABLE:
+    if window_type == WindowType.VARIABLE:
         window_size = distances[neighbours_count].value
-        for i in range(n):
-            if distances[i].value > window_size:
-                neighbours_count = i
-                break
-            if i == n - 1:
-                neighbours_count = n
-                break
 
     if window_size == 0:
         similar_entities = cal_similar_entities(query_entity, entities)
@@ -120,9 +105,6 @@ def nonparametric_regression(query_entity, entities, reduction_type, kernel_type
             return cal_average(similar_entities, reduction_type)
         else:
             return cal_average(entities, reduction_type)
-
-    if neighbours_count == 0:
-        return cal_average(entities, reduction_type)
 
     numerator = 0
     denominator = 0
