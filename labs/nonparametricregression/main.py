@@ -114,11 +114,36 @@ def main():
     naive_max = max(naive_results, key=lambda x: x.fmeasure)
     one_hot_max = max(one_hot_results, key=lambda x: x.fmeasure)
 
+    naive_dependencies = []
+    min_width = 0.2
+    max_width = 6
+    step = 0.1
 
+    while min_width <= max_width:
+        fm = leave_one_out_naive(entities,
+                                 naive_max.distance_type,
+                                 chebyshev_distances,
+                                 naive_max.kernel_type,
+                                 naive_max.window_type,
+                                 [0, 0, min_width])
+        naive_dependencies.append((min_width, fm))
+        min_width += step
 
+    one_hot_dependencies = []
+    i = 1
+    neighbours_max = len(entities) - 2
+    n_step = 1
 
-
-
+    while i <= neighbours_max:
+        fm = leave_one_out_one_hot(entities,
+                                   one_hot_max.distance_type,
+                                   manhattan_distances,
+                                   one_hot_max.kernel_type,
+                                   one_hot_max.window_type,
+                                   window_sizes,
+                                   i)
+        one_hot_dependencies.append((i, fm))
+        i += n_step
 
 
     # print all results
@@ -143,6 +168,14 @@ def main():
           " = ",
           one_hot_max.fmeasure,
           " ----")
+
+    print("-----")
+    for element in naive_dependencies:
+        print(element[0], ";", element[1])
+
+    print("-----")
+    for element in one_hot_dependencies:
+        print(element[0], ";", element[1])
 
 
 if __name__ == "__main__":
