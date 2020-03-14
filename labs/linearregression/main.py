@@ -53,14 +53,14 @@ def main():
     x_test = preprocessing.normalize(x_test)
 
     # Преобразование массивов с классами в np.array
-    y_train = np.array(y_train)
-    y_test = np.array(y_test)
+    y_train = np.asarray(y_train, dtype=np.float)
+    y_test = np.array(y_test, dtype=np.float)
 
     # добавляем к атрибутам единицу
     x_train = np.hstack((x_train, np.ones((x_train.shape[0], 1))))
-    y_test = np.hstack((y_test, np.ones((y_test.shape[0], 1))))
+    x_test = np.hstack((x_test, np.ones((x_test.shape[0], 1))))
 
-    # метод наименьших квадратов
+    # метод наименьших квадратов через svd
     modelLS = Ridge(alpha=0.5, solver='svd')
     modelLS.fit(x_train, y_train)
     y = modelLS.predict(x_train)
@@ -70,10 +70,10 @@ def main():
     error2 = nrmse(y_pred, y_test)
     print(error2)
 
-    # градиентный спуск
-    graphX = []
-    graphY = []
-    for i in range(100, 10000, 100):
+    # стохастический градиентный спуск
+    graph_x = []
+    graph_y = []
+    for i in range(50, 1001, 50):
         modelGD = SGDRegressor(shuffle=True,
                                max_iter=i,
                                penalty="elasticnet",
@@ -84,11 +84,11 @@ def main():
                                power_t=0.3)
         modelGD.fit(x_train, y_train)
         y_pred = modelGD.predict(x_test)
-        graphX.append(i)
-        graphY.append(nrmse(y_pred, y_test))
+        graph_x.append(i)
+        graph_y.append(nrmse(y_pred, y_test))
         print(nrmse(y_pred, y_test))
 
-    plt.plot(graphX, graphY, label="nrmse error for iter number")
+    plt.plot(graph_x, graph_y, label="nrmse - iter number")
     plt.xlabel("iterations")
     plt.ylabel("NRMSE")
     plt.legend()
@@ -97,7 +97,7 @@ def main():
     # оптимизация черного ящика
     graphXBB = []
     graphYBB = []
-    for i in range(100, 5000, 100):
+    for i in range(100, 5001, 100):
         modelBB = RANSACRegressor(max_trials=i, max_skips=100, stop_score=0.95)
         modelBB.fit(x_train, y_train)
         y_pred = modelBB.predict(x_test)
@@ -105,7 +105,7 @@ def main():
         graphYBB.append(nrmse(y_pred, y_test))
         print(nrmse(y_pred, y_test))
 
-    plt.plot(graphXBB, graphYBB, label="nrmse error for sample number")
+    plt.plot(graphXBB, graphYBB, label="nrmse - sample number")
     plt.xlabel("samples")
     plt.ylabel("NRMSE")
     plt.legend()
