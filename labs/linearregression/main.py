@@ -71,8 +71,11 @@ def main():
     print(error2)
 
     # стохастический градиентный спуск
+    # для тестовых данных
     graph_x = []
     graph_y = []
+    # сохраняем все ошибки для градиентного спуска
+    all_descent_nrmse = []
     for i in range(50, 1001, 50):
         modelGD = SGDRegressor(shuffle=True,
                                max_iter=i,
@@ -85,27 +88,101 @@ def main():
         modelGD.fit(x_train, y_train)
         y_pred = modelGD.predict(x_test)
         graph_x.append(i)
-        graph_y.append(nrmse(y_pred, y_test))
-        print(nrmse(y_pred, y_test))
+        error = nrmse(y_pred, y_test)
+        graph_y.append(error)
+        all_descent_nrmse.append((error, i))
 
-    plt.plot(graph_x, graph_y, label="nrmse - iter number")
+    # вывод минимальной ошибки
+    min_nrmse = min(all_descent_nrmse, key= lambda e: e[0])
+    print('Ошибка для градиентного спуска и тестовых данных')
+    print('минимальная ошибка = ', min_nrmse[0], 'количество итераций =', min_nrmse[1])
+
+    # построение графика
+    plt.plot(graph_x, graph_y, label="Test data. NRMSE - iter number")
+    plt.xlabel("iterations")
+    plt.ylabel("NRMSE")
+    plt.legend()
+    plt.show()
+
+    # для тренировочных данных
+    graph_x = []
+    graph_y = []
+    # сохраняем все ошибки для градиентного спуска
+    all_descent_nrmse = []
+    for i in range(50, 1001, 50):
+        modelGD = SGDRegressor(shuffle=True,
+                               max_iter=i,
+                               penalty="elasticnet",
+                               alpha=0.01,
+                               learning_rate="invscaling",
+                               eta0=0.001,
+                               l1_ratio=0.6,
+                               power_t=0.3)
+        modelGD.fit(x_train, y_train)
+        y_pred = modelGD.predict(x_train)
+        graph_x.append(i)
+        error = nrmse(y_pred, y_train)
+        graph_y.append(error)
+        all_descent_nrmse.append((error, i))
+
+    # вывод минимальной ошибки
+    min_nrmse = min(all_descent_nrmse, key=lambda e: e[0])
+    print('Ошибка для градиентного спуска и тренировочных данных')
+    print('минимальная ошибка = ', min_nrmse[0], 'количество итераций =', min_nrmse[1])
+
+    # построение графика
+    plt.plot(graph_x, graph_y, label="Test data. NRMSE - iter number")
     plt.xlabel("iterations")
     plt.ylabel("NRMSE")
     plt.legend()
     plt.show()
 
     # оптимизация черного ящика
+    # для тестовых данных
     graphXBB = []
     graphYBB = []
+    # сохраняем все ошибки для черного ящика
+    all_black_box_nrmse = []
     for i in range(100, 5001, 100):
         modelBB = RANSACRegressor(max_trials=i, max_skips=100, stop_score=0.95)
         modelBB.fit(x_train, y_train)
         y_pred = modelBB.predict(x_test)
         graphXBB.append(i)
-        graphYBB.append(nrmse(y_pred, y_test))
-        print(nrmse(y_pred, y_test))
+        error = nrmse(y_pred, y_test)
+        graphYBB.append(error)
+        all_black_box_nrmse.append((error, i))
 
-    plt.plot(graphXBB, graphYBB, label="nrmse - sample number")
+    # вывод минимальной ошибки
+    min_nrmse = min(all_black_box_nrmse, key=lambda e: e[0])
+    print('минимальная ошибка = ', min_nrmse[0], 'количество итераций =', min_nrmse[1])
+
+    # построение графика
+    plt.plot(graphXBB, graphYBB, label="Test data. NRMSE - sample number")
+    plt.xlabel("samples")
+    plt.ylabel("NRMSE")
+    plt.legend()
+    plt.show()
+
+    # для тренировочных данных
+    graphXBB = []
+    graphYBB = []
+    # сохраняем все ошибки для черного ящика
+    all_black_box_nrmse = []
+    for i in range(100, 5001, 100):
+        modelBB = RANSACRegressor(max_trials=i, max_skips=100, stop_score=0.95)
+        modelBB.fit(x_train, y_train)
+        y_pred = modelBB.predict(x_train)
+        graphXBB.append(i)
+        error = nrmse(y_pred, y_train)
+        graphYBB.append(error)
+        all_black_box_nrmse.append((error, i))
+
+    # вывод минимальной ошибки
+    min_nrmse = min(all_black_box_nrmse, key=lambda e: e[0])
+    print('минимальная ошибка = ', min_nrmse[0], 'количество итераций =', min_nrmse[1])
+
+    # построение графика
+    plt.plot(graphXBB, graphYBB, label="Train data. NRMSE - sample number")
     plt.xlabel("samples")
     plt.ylabel("NRMSE")
     plt.legend()
