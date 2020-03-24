@@ -31,6 +31,7 @@ def main():
             x.append(' '.join(text))
             text.clear()
 
+    # Построение ROC кривой
     counts = CountVectorizer(ngram_range=(1, 30)).fit_transform(x)
     clf = MultinomialNB(fit_prior=False)
     clf.fit(counts, y)
@@ -44,6 +45,7 @@ def main():
     plt.xlabel('False Positive Rate')
     plt.show()
 
+    # Построение графика зависимости точности от априорной вероятности
     graphX, graphY = [], []
     vectorizer = CountVectorizer(ngram_range=(2, 5))
     counts = vectorizer.fit_transform(x)
