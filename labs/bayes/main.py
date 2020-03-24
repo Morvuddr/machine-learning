@@ -32,7 +32,7 @@ def main():
             text.clear()
 
     # Построение ROC кривой
-    counts = CountVectorizer(ngram_range=(1, 30)).fit_transform(x)
+    counts = CountVectorizer(ngram_range=(1, 25)).fit_transform(x)
     clf = MultinomialNB(fit_prior=False)
     clf.fit(counts, y)
     false_positive_rate, true_positive_rate, threshold = roc_curve(y, clf.predict_proba(counts)[:, 0], pos_label=0)
