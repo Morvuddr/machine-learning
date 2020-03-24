@@ -34,10 +34,10 @@ def solution(filename):
     # Построение графика зависимости качества от номера шага.
     model.learning_rate = 1
     model.fit(x_train, y_train)
-    q_func = model.staged_score(x_test, y_test)
+    quality_functions = model.staged_score(x_test, y_test)
     graph_x = []
     graph_y = []
-    for i, predicted in enumerate(q_func, start=0):
+    for i, predicted in enumerate(quality_functions, start=0):
         graph_x.append(i)
         graph_y.append(predicted)
     plt.clf()
