@@ -18,7 +18,11 @@ def solution(filename):
     x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.15)
 
     # Алгоритм бустинга
-    model = AdaBoostClassifier(learning_rate=0.23, n_estimators=150)
+    if filename == 'chips':
+        learning_rate = 0.11
+    else:
+        learning_rate = 1.15
+    model = AdaBoostClassifier(learning_rate=learning_rate, n_estimators=150)
     model.fit(x_train, y_train)
 
     # Построение графика для каждого шага алгоритма
