@@ -31,6 +31,7 @@ def main():
     euclidean_distances = []
     chebyshev_distances = []
 
+    # считывание данных
     with open('solar-flare.csv') as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
 
@@ -41,16 +42,19 @@ def main():
                 target_value = attributes.pop()
                 entity = Entity(target_value, attributes)
 
+                # выполняем наивное преобразование
                 if target_value not in class_names:
                     class_names.append(target_value)
                 entity.class_number = class_names.index(target_value)
                 entities.append(entity)
             line_number += 1
 
+        # выполняем one-hot преобразование
         for entity in entities:
             entity.class_list = [0] * len(class_names)
             entity.class_list[entity.class_number] = 1
 
+    # нормализация атрибутов
     normalize_attributes(entities)
 
     for distance_type in DistanceFuncType:
