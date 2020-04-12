@@ -29,6 +29,7 @@ def main():
     optimizers = ['adam', 'adagrad', 'adadelta', 'adamax', 'nadam']
     bestLoss = sys.float_info.max
     bestOptimizer = 'sgd'
+    optimizer_results = []
 
     for optimizer in optimizers:
         model = Sequential()
@@ -50,13 +51,15 @@ def main():
         model.compile(loss=keras.losses.categorical_crossentropy, optimizer=optimizer, metrics=['accuracy'])
         model.fit(trainX, trainYOneHot, batch_size=64, epochs=2)
         testLoss, testAccuracy = model.evaluate(testX, testYOneHot)
-        print('Optimizer ', optimizer)
-        print('Test loss', testLoss)
-        print('Test accuracy', testAccuracy)
+        optimizer_results.append((optimizer, testLoss, testAccuracy))
         if testLoss < bestLoss:
             bestLoss = testLoss
             bestOptimizer = optimizer
 
+    for result in optimizer_results:
+        print('Optimizer ', result[0])
+        print('Test loss', result[1])
+        print('Test accuracy', result[2])
     print('Best optimizer is {} with loss {}'.format(bestOptimizer, bestLoss))
     model.compile(loss=keras.losses.categorical_crossentropy, optimizer=bestOptimizer, metrics=['accuracy'])
     model.fit(trainX, trainYOneHot, batch_size=64, epochs=10)
