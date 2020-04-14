@@ -9,9 +9,8 @@ import seaborn as sns; sns.set()
 import matplotlib.pyplot as plt
 
 
-def fmeasure(contingency_matrix):
-    print(contingency_matrix)
-    objects_count = 314
+def fmeasure(contingency_matrix, count):
+    objects_count = count
     horizontal_p = []
     verticals_p = []
     localmax = 0.0
@@ -136,7 +135,7 @@ def main():
         # Create crosstab: ct
         ct = pd.crosstab(df['Labels'], df['Clusters'])
         contingency_matrix = sklearn.metrics.cluster.contingency_matrix(target, clusterizator.labels_)
-        fmeasureList.append(fmeasure(contingency_matrix))
+        fmeasureList.append(fmeasure(contingency_matrix, len(clusterizator.labels_)))
 
     sns.lineplot(x=[i for i in range(1, 6)], y=cohesionList)
     plt.show()
