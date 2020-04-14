@@ -44,7 +44,6 @@ def main():
 
         model.add(Flatten())
         model.add(Dense(64))
-
         model.add(Dense(10))
 
         model.add(Activation('softmax'))
