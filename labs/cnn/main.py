@@ -28,39 +28,58 @@ def main():
 
     # методы адаптивного градиентного спуска
     optimizers = ['adam', 'adagrad', 'adadelta', 'adamax', 'nadam']
+    activations = ['relu', 'tanh', 'elu', 'selu', 'sigmoid', 'exponential', 'linear']
     bestLoss = sys.float_info.max
     bestOptimizer = 'sgd'
+    bestActivation = ''
     optimizer_results = []
 
     for optimizer in optimizers:
-        model = Sequential()
+        for activation in activations:
+                model = Sequential()
 
-        model.add(Conv2D(64, (3, 3), input_shape=(28, 28, 1)))
-        model.add(Activation('relu'))
-        model.add(MaxPooling2D(pool_size=(2, 2)))
+                model.add(Conv2D(64, (3, 3), input_shape=(28, 28, 1)))
+                model.add(Activation(activation))
+                model.add(MaxPooling2D(pool_size=(2, 2)))
 
-        model.add(Conv2D(64, (3, 3)))
-        model.add(Activation('relu'))
-        model.add(MaxPooling2D(pool_size=(2, 2)))
+                model.add(Conv2D(64, (3, 3)))
+                model.add(Activation(activation))
+                model.add(MaxPooling2D(pool_size=(2, 2)))
 
-        model.add(Flatten())
-        model.add(Dense(64))
-        model.add(Dense(10))
+                model.add(Flatten())
+                model.add(Dense(64))
+                model.add(Dense(10))
 
-        model.add(Activation('softmax'))
-        model.compile(loss=keras.losses.categorical_crossentropy, optimizer=optimizer, metrics=['accuracy'])
-        model.fit(trainX, trainYOneHot, batch_size=64, epochs=2)
-        testLoss, testAccuracy = model.evaluate(testX, testYOneHot)
-        optimizer_results.append((optimizer, testLoss, testAccuracy))
-        if testLoss < bestLoss:
-            bestLoss = testLoss
-            bestOptimizer = optimizer
+                model.add(Activation('softmax'))
+                model.compile(loss=keras.losses.categorical_crossentropy, optimizer=optimizer, metrics=['accuracy'])
+                history = model.fit(trainX, trainYOneHot, batch_size=64, epochs=2)
+                testLoss, testAccuracy = model.evaluate(testX, testYOneHot)
+                optimizer_results.append((optimizer, testLoss, testAccuracy, activation))
+                if testLoss < bestLoss:
+                    bestLoss = testLoss
+                    bestOptimizer = optimizer
+                    bestActivation = activation
 
     for result in optimizer_results:
         print('Optimizer ', result[0])
         print('Test loss', result[1])
         print('Test accuracy', result[2])
-    print('Best optimizer is {} with loss {}'.format(bestOptimizer, bestLoss))
+        print('Activation', result[3])
+    print('Best optimizer is {}, best activation is {}, with loss {}'.format(bestOptimizer, bestActivation, bestLoss))
+
+    model = Sequential()
+
+    model.add(Conv2D(64, (3, 3), input_shape=(28, 28, 1)))
+    model.add(Activation(bestActivation))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+
+    model.add(Conv2D(64, (3, 3)))
+    model.add(Activation(bestActivation))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+
+    model.add(Flatten())
+    model.add(Dense(64))
+    model.add(Dense(10))
     model.compile(loss=keras.losses.categorical_crossentropy, optimizer=bestOptimizer, metrics=['accuracy'])
     model.fit(trainX, trainYOneHot, batch_size=64, epochs=10)
     classes = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
