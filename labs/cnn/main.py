@@ -25,6 +25,7 @@ def main():
     trainYOneHot = to_categorical(trainY)
     testYOneHot = to_categorical(testY)
 
+
     # методы адаптивного градиентного спуска
     optimizers = ['adam', 'adagrad', 'adadelta', 'adamax', 'nadam']
     bestLoss = sys.float_info.max
@@ -65,7 +66,7 @@ def main():
     classes = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     predictions = model.predict(testX)
     testYPredicted = []
-    for i in range(10000):
+    for i in range(len(testY)):
         testYPredicted.append(numpy.argmax(predictions[i]))
     print(confusion_matrix(testY, testYPredicted))
 
@@ -105,11 +106,11 @@ def main():
     classes = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     predictions = model.predict(testX)
     testYPredicted = []
-    for i in range(10000):
+    for i in range(len(testY)):
         testYPredicted.append(numpy.argmax(predictions[i]))
     print(confusion_matrix(testY, testYPredicted))
 
-    for i in range(10000):
+    for i in range(len(testY)):
         if testYPredicted[i] != testY[i]:
             pyplot.imshow(testXOriginal[i])
             pyplot.text(1, 1, s=str(testY[i]) + " | " + str(testYPredicted[i]))
