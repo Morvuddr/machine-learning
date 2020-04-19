@@ -51,32 +51,39 @@ class kMeans:
             self.clusterCenters = []
 
     def fit(self, X):
+        flag = False
+        while not flag:
+            flag = self.calculateClusters(X)
+
+    def calculateClusters(self, X):
         clusterCentersIndices = random.sample([i for i in range(X.shape[0])], k=self.n_clusters)
         self.clusterCenters = [X[i] for i in clusterCentersIndices]
         self.dataClusters = [-1 for i in range(X.shape[0])]
         self.X = X
         while True:
+            if np.isnan(self.clusterCenters).any():
+                return False
             prevClusterCenters = self.clusterCenters
-            #assign cluster for points
+            # assign cluster for points
             for i in range(X.shape[0]):
                 point = X[i]
                 distances = []
                 for j in self.clusterCenters:
                     distances.append(self.distance(point, j))
                 self.dataClusters[i] = np.argmin(distances)
-            #find new centers
+            # find new centers
             accumulative = [np.zeros_like(self.clusterCenters[0]) for i in range(self.n_clusters)]
             countOfPointsInCluster = [0 for i in range(self.n_clusters)]
             for i in range(X.shape[0]):
                 accumulative[self.dataClusters[i]] += X[i]
-                countOfPointsInCluster[self.dataClusters[i]] +=1
+                countOfPointsInCluster[self.dataClusters[i]] += 1
             for i in range(self.n_clusters):
                 accumulative[i] /= countOfPointsInCluster[i]
             self.clusterCenters = accumulative
             if np.array_equal(prevClusterCenters, self.clusterCenters):
                 break
         self.labels_ = self.dataClusters
-
+        return True
 
     def getClusterCohesion(self):
         result = 0.0
@@ -88,18 +95,6 @@ class kMeans:
 def main():
     data = pd.read_csv('../nonparametricregression/solar-flare.csv')
     #print(data)
-    data = pd.get_dummies(data=data, columns=['largest_spot_size',
-                                              'spot_distribution',
-                                              'Activity',
-                                              'Evolution',
-                                              'Previous_24_hour_flare_activity_code',
-                                              'Historically-complex',
-                                              'Did_region_become_historically_complex',
-                                              'Area',
-                                              'Area_of_the_largest_spot',
-                                              'C-class_flares_production_by_this_region',
-                                              'M-class_flares_production_by_this_region',
-                                              'X-class_flares_production_by_this_region'])
     target = data['class']
     data = data.drop('class', 1)
 
@@ -107,7 +102,7 @@ def main():
 
     data = minmax_scale(data)
 
-    clusterizator = kMeans(n_clusters=5)
+    clusterizator = kMeans(n_clusters=10)
     clusterizator.fit(data)
 
     pca = PCA(n_components=2)
@@ -126,20 +121,16 @@ def main():
 
     cohesionList = []
     fmeasureList = []
-    for i in range(1, 6):
+    for i in range(1, 11):
         clusterizator = kMeans(n_clusters=i)
         clusterizator.fit(data)
         cohesionList.append(clusterizator.getClusterCohesion())
-        # Create a DataFrame with labels and varieties as columns: df
-        df = pd.DataFrame({'Labels': target, 'Clusters': clusterizator.labels_})
-        # Create crosstab: ct
-        ct = pd.crosstab(df['Labels'], df['Clusters'])
         contingency_matrix = sklearn.metrics.cluster.contingency_matrix(target, clusterizator.labels_)
         fmeasureList.append(fmeasure(contingency_matrix, len(clusterizator.labels_)))
 
-    sns.lineplot(x=[i for i in range(1, 6)], y=cohesionList)
+    sns.lineplot(x=[i for i in range(1, 11)], y=cohesionList)
     plt.show()
-    sns.lineplot(x=[i for i in range(1, 6)], y=fmeasureList)
+    sns.lineplot(x=[i for i in range(1, 11)], y=fmeasureList)
     plt.show()
 
 
