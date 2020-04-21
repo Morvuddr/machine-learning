@@ -77,10 +77,10 @@ for i in range(n):
     pairs_count[x1_temp].setdefault(x2_temp, 0)
     pairs_count[x1_temp][x2_temp] += 1
 
-hi2 = n
+сhi2 = n
 for key, value in pairs_count.items():
     for pkey, pvalue in value.items():
         val = x1_counts[key] * x2_counts[pkey] / float(n)
-        hi2 += (pvalue - val) ** 2 / val - val
+        сhi2 += (pvalue - val) ** 2 / val - val
 
-print(hi2)
+print(сhi2)
